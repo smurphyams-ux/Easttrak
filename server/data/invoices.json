@@ -1,0 +1,28 @@
+[
+  {
+    "id": "INV-1001",
+    "customerName": "Acme Corp",
+    "serviceAddress": "123 Main St",
+    "amount": 1200,
+    "status": "paid",
+    "date": "2026-03-01",
+    "dueDate": "2026-03-15",
+    "items": [
+      { "description": "Dumpster Rental", "quantity": 1, "rate": 1200 }
+    ],
+    "notes": "Thank you for your business!"
+  },
+  {
+    "id": "INV-1002",
+    "customerName": "Beta LLC",
+    "serviceAddress": "456 Oak Ave",
+    "amount": 800,
+    "status": "pending",
+    "date": "2026-03-05",
+    "dueDate": "2026-03-20",
+    "items": [
+      { "description": "Dumpster Rental", "quantity": 1, "rate": 800 }
+    ],
+    "notes": "Payment due in 15 days."
+  }
+]

@@ -1,0 +1,200 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DumpsterTracker</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+            background: #f5f5f5;
+        }
+        .header {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            margin-bottom: 20px;
+        }
+        .map-container {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            height: 600px;
+        }
+        #map {
+            width: 100%;
+            height: 100%;
+            border-radius: 4px;
+        }
+        .deliveries-list {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            margin-top: 20px;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        th, td {
+            padding: 12px;
+            text-align: left;
+            border-bottom: 1px solid #ddd;
+        }
+        th {
+            background: #f9fafb;
+            font-weight: 600;
+        }
+        .status {
+            padding: 4px 12px;
+            border-radius: 12px;
+            font-size: 12px;
+            font-weight: 600;
+        }
+        .status-delivered { background: #d1fae5; color: #065f46; }
+        .status-in-transit { background: #fef3c7; color: #92400e; }
+        .status-pending { background: #dbeafe; color: #1e40af; }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>🚛 DumpsterTracker - Delivery Routes</h1>
+        <p>Track and manage all container deliveries</p>
+    </div>
+
+    <div class="map-container">
+        <div id="map"></div>
+    </div>
+
+    <div class="deliveries-list">
+        <h2>Today's Deliveries</h2>
+        <table id="deliveries-table">
+            <thead>
+                <tr>
+                    <th>#</th>
+                    <th>Container</th>
+                    <th>Customer</th>
+                    <th>Address</th>
+                    <th>Status</th>
+                </tr>
+            </thead>
+            <tbody></tbody>
+        </table>
+    </div>
+
+    <script>
+        // Delivery data
+        const deliveries = [
+            {
+                id: '1',
+                containerNumber: 'D-001',
+                customerName: 'ABC Construction',
+                address: '123 Main St, New York, NY 10001',
+                lat: 40.7589,
+                lng: -73.9851,
+                status: 'delivered'
+            },
+            {
+                id: '2',
+                containerNumber: 'D-002',
+                customerName: 'XYZ Landscaping',
+                address: '456 Park Ave, New York, NY 10022',
+                lat: 40.7614,
+                lng: -73.9776,
+                status: 'in-transit'
+            },
+            {
+                id: '3',
+                containerNumber: 'D-003',
+                customerName: 'Home Renovation Inc',
+                address: '789 Broadway, New York, NY 10003',
+                lat: 40.7308,
+                lng: -73.9973,
+                status: 'pending'
+            }
+        ];
+
+        // Initialize map
+        function initMap() {
+            const map = new google.maps.Map(document.getElementById('map'), {
+                zoom: 12,
+                center: { lat: 40.7489, lng: -73.9680 }
+            });
+
+            const bounds = new google.maps.LatLngBounds();
+
+            deliveries.forEach((delivery, index) => {
+                const marker = new google.maps.Marker({
+                    position: { lat: delivery.lat, lng: delivery.lng },
+                    map: map,
+                    title: delivery.customerName,
+                    label: {
+                        text: String(index + 1),
+                        color: 'white',
+                        fontWeight: 'bold'
+                    }
+                });
+
+                const infoWindow = new google.maps.InfoWindow({
+                    content: `
+                        <div style="padding: 10px;">
+                            <h3 style="margin: 0 0 10px 0;">${delivery.containerNumber}</h3>
+                            <p style="margin: 5px 0;"><strong>Customer:</strong> ${delivery.customerName}</p>
+                            <p style="margin: 5px 0;"><strong>Address:</strong> ${delivery.address}</p>
+                            <p style="margin: 5px 0;"><strong>Status:</strong> ${delivery.status}</p>
+                        </div>
+                    `
+                });
+
+                marker.addListener('click', () => {
+                    infoWindow.open(map, marker);
+                });
+
+                bounds.extend({ lat: delivery.lat, lng: delivery.lng });
+            });
+
+            map.fitBounds(bounds);
+        }
+
+        // Populate table
+        function populateTable() {
+            const tbody = document.querySelector('#deliveries-table tbody');
+            deliveries.forEach((delivery, index) => {
+                const row = tbody.insertRow();
+                row.innerHTML = `
+                    <td>${index + 1}</td>
+                    <td><strong>${delivery.containerNumber}</strong></td>
+                    <td>${delivery.customerName}</td>
+                    <td>${delivery.address}</td>
+                    <td><span class="status status-${delivery.status}">${delivery.status}</span></td>
+                `;
+            });
+        }
+
+        // Load Google Maps
+        function loadGoogleMaps() {
+            const apiKey = 'YOUR_API_KEY_HERE'; // Replace with your actual API key
+            const script = document.createElement('script');
+            script.src = `https://maps.googleapis.com/maps/api/js?key=${apiKey}&callback=initMap`;
+            script.async = true;
+            script.defer = true;
+            document.head.appendChild(script);
+        }
+
+        // Initialize
+        populateTable();
+        
+        // Uncomment this line after adding your Google Maps API key
+        // loadGoogleMaps();
+        
+        // Temporary: Show message if no API key
+        document.getElementById('map').innerHTML = '<div style="display: flex; align-items: center; justify-content: center; height: 100%; background: #f3f4f6; border-radius: 4px;"><div style="text-align: center;"><h3>Map Placeholder</h3><p>Add your Google Maps API key to see the map</p></div></div>';
+    </script>
+</body>
+</html>

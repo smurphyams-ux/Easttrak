@@ -1,0 +1,14 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 100">
+  <!-- Blue background -->
+  <rect width="400" height="100" fill="#4169B1"/>
+  
+  <!-- TrashGoAway.com text -->
+  <text x="200" y="50" font-family="Arial, sans-serif" font-size="36" font-weight="bold" fill="#C41E3A" text-anchor="middle" dominant-baseline="middle">
+    TrashGoAway.com
+  </text>
+  
+  <!-- Tagline -->
+  <text x="200" y="75" font-family="Arial, sans-serif" font-size="12" fill="white" text-anchor="middle">
+    YOU CALL WE HAUL
+  </text>
+</svg>

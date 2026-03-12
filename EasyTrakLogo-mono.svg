@@ -1,0 +1,8 @@
+<svg width="320" height="80" viewBox="0 0 320 80" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <rect width="320" height="80" rx="18" fill="#222"/>
+  <text x="38" y="54" font-family="'Segoe Script', 'Comic Sans MS', cursive, sans-serif" font-size="38" font-weight="bold" fill="#fff" letter-spacing="2">EasyTrak</text>
+  <text x="220" y="68" font-family="'Montserrat', Arial, Helvetica, sans-serif" font-size="17" fill="#bbb" font-weight="bold">LLC</text>
+  <polyline points="260,32 278,50 305,18" stroke="#fff" stroke-width="6" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+  <circle cx="305" cy="18" r="8" fill="#222" stroke="#fff" stroke-width="4"/>
+  <circle cx="305" cy="18" r="3" fill="#fff"/>
+</svg>

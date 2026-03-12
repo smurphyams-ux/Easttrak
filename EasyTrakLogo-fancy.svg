@@ -1,0 +1,18 @@
+<svg width="320" height="80" viewBox="0 0 320 80" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="grad1" x1="0" y1="0" x2="320" y2="0" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" stop-color="#6a11cb"/>
+      <stop offset="100%" stop-color="#2575fc"/>
+    </linearGradient>
+    <linearGradient id="grad2" x1="0" y1="0" x2="0" y2="80" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" stop-color="#43e97b"/>
+      <stop offset="100%" stop-color="#38f9d7"/>
+    </linearGradient>
+  </defs>
+  <rect width="320" height="80" rx="18" fill="url(#grad1)"/>
+  <text x="38" y="54" font-family="'Segoe Script', 'Comic Sans MS', cursive, sans-serif" font-size="38" font-weight="bold" fill="#fff" letter-spacing="2">EasyTrak</text>
+  <text x="220" y="68" font-family="'Montserrat', Arial, Helvetica, sans-serif" font-size="17" fill="#f9f871" font-weight="bold">LLC</text>
+  <polyline points="260,32 278,50 305,18" stroke="url(#grad2)" stroke-width="6" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+  <circle cx="305" cy="18" r="8" fill="#fff" stroke="#43e97b" stroke-width="4"/>
+  <circle cx="305" cy="18" r="3" fill="#43e97b"/>
+</svg>
