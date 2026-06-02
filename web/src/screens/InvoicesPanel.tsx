@@ -1,3 +1,18 @@
+// Helper to log activity to dashboard
+function logRecentActivity(activity: { type: string; description: string; status?: string }) {
+  const prev = JSON.parse(localStorage.getItem('recent_activity') || '[]');
+  const entry = {
+    id: `invoice-${Date.now()}`,
+    type: activity.type,
+    description: activity.description,
+    time: new Date().toLocaleString(),
+    status: activity.status || 'completed',
+    createdAt: new Date().toISOString(),
+  };
+  const updated = [entry, ...prev].slice(0, 100);
+  localStorage.setItem('recent_activity', JSON.stringify(updated));
+  window.dispatchEvent(new Event('easytrak:activity-updated'));
+}
 import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import ReactDOM from 'react-dom';
@@ -5,6 +20,8 @@ import axios from 'axios';
 
 function InvoicesPanel() {
       // ...existing code...
+
+      // Removed unused handleTestButton
     // Inline editing state for dates
     const [inlineEditIdx, setInlineEditIdx] = useState<number | null>(null);
     const [inlineEditDates, setInlineEditDates] = useState<{ dateOrdered: string; reservedDate: string; dueDate: string }>({ dateOrdered: '', reservedDate: '', dueDate: '' });
@@ -25,8 +42,7 @@ function InvoicesPanel() {
       }
     };
   const navigate = useNavigate();
-  // Paid invoice state: { paid: boolean, date: string }
-  const [paidInfo, setPaidInfo] = useState<{ paid: boolean, date: string } | null>(null);
+  // ...existing code...
   // For printing
   const [printInvoice, setPrintInvoice] = useState<any | null>(null);
   const printRef = useRef<HTMLDivElement>(null);
@@ -97,51 +113,22 @@ function InvoicesPanel() {
     setEditingInvoice(null);
     setEditForm(null);
   };
-  const [trailerOptions, setTrailerOptions] = useState<any[]>([]);
+  // Removed unused trailerOptions and setTrailerOptions
   const [customers, setCustomers] = useState<any[]>([]);
-  const [showAddTrailer, setShowAddTrailer] = useState(false);
-  const [addTrailerForm, setAddTrailerForm] = useState({ number: '', size: '' });
-  const [addingTrailer, setAddingTrailer] = useState(false);
+  // Removed unused showAddTrailer state
+  // Removed unused addTrailerForm and setAddTrailerForm
+  // Removed addingTrailer state (no longer used)
   const [invoices, setInvoices] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [showForm, setShowForm] = useState(false);
-  const [form, setForm] = useState({
-    dateOrdered: '',
-    reservedDate: '',
-    trailerNumber: '',
-    trailerSize: '',
-    address: '',
-    client: '',
-    phone: '',
-      email: '',
-    source: '',
-    comment: '',
-    paymentAmount: '',
-  });
+  // Removed showForm state (no longer used)
+  // Removed unused form and setForm
 
-  // Preset comment options and their corresponding amounts
-  const commentOptions = [
-    { label: 'Standard Delivery', amount: 250 },
-    { label: 'Express Delivery', amount: 350 },
-    { label: 'Pickup Only', amount: 100 },
-    { label: 'Long Distance', amount: 400 },
-    { label: 'Special Handling', amount: 500 },
-    { label: '10 CYD 4 day rental up to 2 tons, $120 per ton after', amount: 295 },
-  ];
-  const [saving, setSaving] = useState(false);
+  // Removed unused commentOptions
+  // Removed saving state (no longer used)
 
-  const fetchTrailerOptions = async () => {
-    try {
-      const res = await axios.get('/api/trailer-options');
-      // The backend returns { success: true, options: [...] }
-      setTrailerOptions(Array.isArray(res.data.options) ? res.data.options : []);
-    } catch {
-      setTrailerOptions([]);
-    }
-  };
+  // Removed unused fetchTrailerOptions
   useEffect(() => {
-    fetchTrailerOptions();
     const fetchInvoices = async () => {
       try {
         const res = await axios.get('/api/invoices');
@@ -169,133 +156,17 @@ function InvoicesPanel() {
     fetchCustomers();
   }, []);
 
-  const handleDelete = async (invoiceId: string) => {
-    if (!window.confirm('Are you sure you want to delete this invoice?')) return;
-    try {
-      await axios.delete(`/api/invoices/${invoiceId}`);
-      setInvoices(invoices.filter((inv: any) => inv.id !== invoiceId));
-    } catch (err) {
-      alert('Failed to delete invoice.');
-    }
-  };
+  // Removed handleFormChange (no longer used)
 
-  const handleFormChange = (
-    e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
-  ) => {
-    const { name, value } = e.target;
-    if (name === 'trailerNumber') {
-      const selected = trailerOptions.find(
-        (tr: any) => String(tr.number || tr.id) === value
-      );
-      setForm(f => ({
-        ...f,
-        trailerNumber: value,
-        trailerSize: selected && selected.size ? selected.size : '',
-      }));
-    } else if (name === 'client') {
-      // If the value matches a customer, autofill phone
-      const selectedCustomer = customers.find((c: any) => c.name === value);
-      setForm(f => ({
-        ...f,
-        client: value,
-        phone: selectedCustomer ? selectedCustomer.phone || '' : f.phone,
-          email: selectedCustomer ? selectedCustomer.email || '' : f.email,
-      }));
-    } else if (name === 'comment') {
-      // If the value matches a preset, auto-fill paymentAmount
-      const preset = commentOptions.find(opt => opt.label === value);
-      setForm(f => ({
-        ...f,
-        comment: value,
-        paymentAmount: preset ? String(preset.amount) : f.paymentAmount,
-      }));
-    } else {
-      setForm({ ...form, [name]: value });
-    }
-  };
-
-  const handleCreate = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setSaving(true);
-    try {
-      // If email is present and matches a customer, update the customer email
-      if (form.client && form.email) {
-        const customer = customers.find((c: any) => c.name === form.client);
-        if (customer && customer.email !== form.email) {
-          await axios.put(`/api/customers/${customer.id}`, {
-            name: customer.name,
-            phone: customer.phone,
-            email: form.email,
-            businessId: customer.businessId,
-          });
-        }
-      }
-      const res = await axios.post('/api/invoices', {
-        customer_name: form.client,
-        phone_number: form.phone,
-        service_address: form.address,
-        source: form.source,
-        trailer_number: form.trailerNumber,
-        trailer_size: form.trailerSize,
-        reserve_date: form.reservedDate,
-        amount: form.paymentAmount ? Number(form.paymentAmount) : 0,
-        status: 'pending',
-        date_ordered: form.dateOrdered,
-        notes: form.comment,
-        email: form.email,
-        businessId: 'default-business',
-      });
-      setInvoices([res.data, ...invoices]);
-      setShowForm(false);
-      setForm({
-        dateOrdered: '',
-        reservedDate: '',
-        trailerNumber: '',
-        trailerSize: '',
-        address: '',
-        client: '',
-        phone: '',
-        email: '',
-        source: '',
-        comment: '',
-        paymentAmount: '',
-      });
-    } catch (err) {
-      alert('Failed to create invoice.');
-    } finally {
-      setSaving(false);
-    }
-  };
+  // Removed handleCreate (no longer used)
 
   // Add trailer submit handler
-  const handleAddTrailer = async () => {
-    if (!addTrailerForm.number) return;
-    setAddingTrailer(true);
-    try {
-      await axios.post('/api/trailer-options', {
-        number: addTrailerForm.number,
-        size: addTrailerForm.size,
-      });
-      setAddTrailerForm({ number: '', size: '' });
-      setShowAddTrailer(false);
-      await fetchTrailerOptions();
-    } catch {
-      alert('Failed to add trailer.');
-    } finally {
-      setAddingTrailer(false);
-    }
-  };
+  // Removed handleAddTrailer (no longer used)
 
   // Handler to show printable invoice in a hidden div and print
   const handleViewInvoice = (invoice: any) => {
     setLastAction('print');
     setPrintInvoice(invoice);
-    // If invoice is already paid, show watermark
-    if (invoice.paid && invoice.paidDate) {
-      setPaidInfo({ paid: true, date: String(invoice.paidDate).slice(0, 10) });
-    } else {
-      setPaidInfo(null);
-    }
     setTimeout(() => {
       if (printRef.current) {
         window.print();
@@ -303,24 +174,7 @@ function InvoicesPanel() {
     }, 100);
   };
 
-  // Mark as Paid handler
-  const handleMarkAsPaid = async () => {
-    if (!printInvoice) return;
-    const paidDate = new Date().toISOString().slice(0, 10);
-    try {
-      await axios.put(`/api/invoices/${printInvoice.id}`, {
-        ...printInvoice,
-        paid: true,
-        paidDate,
-      });
-      setPaidInfo({ paid: true, date: paidDate });
-      // Update invoice in local state
-      setPrintInvoice({ ...printInvoice, paid: true, paidDate });
-      setInvoices((prev) => prev.map(inv => inv.id === printInvoice.id ? { ...inv, paid: true, paidDate } : inv));
-    } catch (err) {
-      alert('Failed to mark as paid.');
-    }
-  };
+  // ...existing code...
 
   let printPortal = null;
   // Handler for emailing invoice with PDF attachment and custom message (server-side)
@@ -351,6 +205,10 @@ function InvoicesPanel() {
         date_ordered: editForm.dateOrdered,
         notes: editForm.comment,
         email: editForm.email,
+      });
+      logRecentActivity({
+        type: 'Invoice',
+        description: `Updated invoice for ${editForm.client}`,
       });
       // Refresh invoices
       const res = await axios.get('/api/invoices');
@@ -406,29 +264,7 @@ function InvoicesPanel() {
         >
           Close
         </button>
-        {/* PAID Watermark */}
-        {paidInfo?.paid && (
-          <div
-            className="paid-watermark"
-            style={{
-              position: 'absolute',
-              top: '40%',
-              left: '50%',
-              transform: 'translate(-50%, -50%) rotate(-20deg)',
-              fontSize: 80,
-              color: 'rgba(229, 62, 62, 0.18)',
-              fontWeight: 900,
-              zIndex: 10000,
-              pointerEvents: 'none',
-              userSelect: 'none',
-              textAlign: 'center',
-              width: '100%',
-              whiteSpace: 'pre',
-            }}
-          >
-            {'PAID\n' + paidInfo.date}
-          </div>
-        )}
+        {/* ...existing code... */}
                       {/* Action buttons are only in the main table, not in the print modal */}
         <div className="header" style={{ display: 'flex', alignItems: 'flex-start', gap: 18, marginBottom: 12, position: 'relative', zIndex: 2 }}>
           {/* Logo with fallback: try absolute, then relative, then text fallback */}
@@ -446,27 +282,7 @@ function InvoicesPanel() {
                 onError={() => setLogoFailed(true)}
               />
             )}
-            {/* Mark as Paid button always visible in modal, hidden in print */}
-            <button
-              className="mark-paid-btn"
-              onClick={handleMarkAsPaid}
-              style={{
-                background: '#e53e3e',
-                color: '#fff',
-                border: '2px solid #c53030',
-                borderRadius: 6,
-                padding: '8px 18px',
-                fontWeight: 700,
-                fontSize: 16,
-                cursor: 'pointer',
-                marginTop: 12,
-                boxShadow: '0 1px 4px #0001',
-                zIndex: 10,
-                display: 'block',
-              }}
-            >
-              Mark as Paid
-            </button>
+            {/* ...existing code... */}
           </div>
           <div className="company-info" style={{ fontSize: 13, fontWeight: 600, color: '#2d3748', marginTop: 8, textAlign: 'right', flex: 1 }}>
             TrashGoAway.com L.L.C<br />
@@ -492,7 +308,11 @@ function InvoicesPanel() {
             <tr><th style={{ background: '#e2e8f0', textAlign: 'left', padding: '5px 7px', fontSize: 12 }}>Phone #</th><td style={{ border: '1px solid #ccc', padding: '5px 7px', fontSize: 12 }}>{printInvoice.phone_number || printInvoice.phone || ''}</td></tr>
             <tr><th style={{ background: '#e2e8f0', textAlign: 'left', padding: '5px 7px', fontSize: 12 }}>Source</th><td style={{ border: '1px solid #ccc', padding: '5px 7px', fontSize: 12 }}>{printInvoice.source || ''}</td></tr>
             <tr><th style={{ background: '#e2e8f0', textAlign: 'left', padding: '5px 7px', fontSize: 12 }}>Comments</th><td style={{ border: '1px solid #ccc', padding: '5px 7px', fontSize: 12 }}>{printInvoice.comment || printInvoice.comments || printInvoice.notes || ''}</td></tr>
-            <tr><th style={{ background: '#e2e8f0', textAlign: 'left', padding: '5px 7px', fontSize: 12 }}>Payment Amount</th><td style={{ border: '1px solid #ccc', padding: '5px 7px', fontSize: 12 }}>{printInvoice.amount ? `$${printInvoice.amount}` : ''}</td></tr>
+            <tr><th style={{ background: '#e2e8f0', textAlign: 'left', padding: '5px 7px', fontSize: 12 }}>Payment Amount</th><td style={{ border: '1px solid #ccc', padding: '5px 7px', fontSize: 12 }}>{
+              printInvoice.amount !== undefined && printInvoice.amount !== null && printInvoice.amount !== ''
+                ? `$${Number(printInvoice.amount).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`
+                : ''
+            }</td></tr>
           </tbody>
         </table>
         <div className="terms" style={{ marginTop: 14, fontSize: 11, color: '#333', background: '#fff', padding: 10, borderRadius: 6, boxShadow: '0 1px 4px #0001' }}>
@@ -526,19 +346,14 @@ function InvoicesPanel() {
   }
   return (
     <>
-      <div style={{ margin: '24px 24px 0 24px' }}>
-        <a href="/create-invoice" style={{
-          display: 'inline-block',
-          background: '#2563eb',
-          color: '#fff',
-          padding: '8px 18px',
-          borderRadius: 6,
-          textDecoration: 'none',
-          fontWeight: 600,
-          fontSize: 16,
-          marginBottom: 16,
-          boxShadow: '0 1px 4px #0001',
-        }}>+ New Invoice (direct link)</a>
+      <div style={{ margin: '24px 24px 0 24px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+        <h1 style={{ margin: 0 }}>Invoices</h1>
+        <button
+          style={{ background: '#2563eb', color: '#fff', padding: '10px 24px', border: 'none', borderRadius: 6, fontWeight: 600, fontSize: 16, cursor: 'pointer' }}
+          onClick={() => navigate('/create-invoice')}
+        >
+          + Create Invoice
+        </button>
       </div>
       {printPortal}
       <div>
@@ -565,24 +380,6 @@ function InvoicesPanel() {
         >
           ← Back
         </button>
-        <button
-          style={{
-            background: '#38a169',
-            color: '#fff',
-            border: 'none',
-            borderRadius: 6,
-            padding: '6px 18px',
-            fontWeight: 600,
-            fontSize: 15,
-            cursor: 'pointer',
-            boxShadow: '0 1px 4px #0001',
-            margin: '24px 0 0 24px',
-            display: 'block',
-          }}
-          onClick={() => navigate('/create-invoice')}
-        >
-          Create Invoice
-        </button>
         <div style={{ margin: '32px 24px 0 24px' }}>
           {loading ? (
             <div>Loading invoices...</div>
@@ -595,9 +392,6 @@ function InvoicesPanel() {
                   <th style={{ padding: '10px 8px', fontWeight: 700 }}>Date Ordered</th>
                   <th style={{ padding: '10px 8px', fontWeight: 700 }}>Reserved Date</th>
                   <th style={{ padding: '10px 8px', fontWeight: 700 }}>Due Date</th>
-                  <th style={{ padding: '10px 8px', fontWeight: 700 }}>City</th>
-                  <th style={{ padding: '10px 8px', fontWeight: 700 }}>State</th>
-                  <th style={{ padding: '10px 8px', fontWeight: 700 }}>ZIP</th>
                   <th style={{ padding: '10px 8px', fontWeight: 700 }}>Invoice #</th>
                   <th style={{ padding: '10px 8px', fontWeight: 700 }}>Trailer #</th>
                   <th style={{ padding: '10px 8px', fontWeight: 700 }}>Trailer Size</th>
@@ -610,6 +404,7 @@ function InvoicesPanel() {
                   <th style={{ padding: '10px 8px', fontWeight: 700 }}>Source</th>
                   <th style={{ padding: '10px 8px', fontWeight: 700 }}>Comments</th>
                   <th style={{ padding: '10px 8px', fontWeight: 700 }}>Payment Amount</th>
+                  <th style={{ padding: '10px 8px', fontWeight: 700 }}>Paid</th>
                   <th style={{ padding: '10px 8px', fontWeight: 700 }}>Actions</th>
                 </tr>
               </thead>
@@ -684,9 +479,6 @@ function InvoicesPanel() {
                           }} style={{ cursor: 'pointer' }}>{invoice.due_date || ''}</span>
                         )}
                       </td>
-                      <td style={{ padding: '8px', borderTop: '1px solid #e2e8f0' }}>{invoice.city || ''}</td>
-                      <td style={{ padding: '8px', borderTop: '1px solid #e2e8f0' }}>{invoice.state || ''}</td>
-                      <td style={{ padding: '8px', borderTop: '1px solid #e2e8f0' }}>{invoice.zip || ''}</td>
                       <td style={{ padding: '8px', borderTop: '1px solid #e2e8f0' }}>{invoice.invoice_id || invoice.id}</td>
                       <td style={{ padding: '8px', borderTop: '1px solid #e2e8f0' }}>{invoice.trailer_number || ''}</td>
                       <td style={{ padding: '8px', borderTop: '1px solid #e2e8f0' }}>{invoice.trailer_size || ''}</td>
@@ -698,13 +490,48 @@ function InvoicesPanel() {
                       <td style={{ padding: '8px', borderTop: '1px solid #e2e8f0' }}>{invoice.phone_number || invoice.phone || ''}</td>
                       <td style={{ padding: '8px', borderTop: '1px solid #e2e8f0' }}>{invoice.source || ''}</td>
                       <td style={{ padding: '8px', borderTop: '1px solid #e2e8f0' }}>{invoice.comment || invoice.comments || invoice.notes || ''}</td>
-                      <td style={{ padding: '8px', borderTop: '1px solid #e2e8f0' }}>{invoice.amount ? `$${invoice.amount}` : ''}</td>
+                      <td style={{ padding: '8px', borderTop: '1px solid #e2e8f0' }}>{
+                        invoice.amount !== undefined && invoice.amount !== null && invoice.amount !== ''
+                          ? `$${Number(invoice.amount).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`
+                          : ''
+                      }</td>
+                      <td style={{ padding: '8px', borderTop: '1px solid #e2e8f0', textAlign: 'center' }}>
+                        <input
+                          type="checkbox"
+                          checked={!!invoice.paid}
+                          disabled={!!invoice.paid}
+                          onClick={e => e.stopPropagation()}
+                          onChange={async () => {
+                            if (!invoice.paid) {
+                              try {
+                                const paid_at = new Date().toISOString();
+                                await axios.patch(`/api/invoices/${invoice.id}/mark-paid`, {
+                                  paid_at,
+                                  status: 'paid',
+                                });
+                                setInvoices(prev => prev.map((inv, i) =>
+                                  i === idx ? { ...inv, paid: true, paidDate: paid_at } : inv
+                                ));
+                                logRecentActivity({ type: 'Invoice', description: `Marked invoice #${invoice.id} as paid` });
+                              } catch (err) {
+                                alert('Failed to mark as paid.');
+                              }
+                            }
+                          }}
+                          title={invoice.paid ? `Paid on ${invoice.paidDate ? new Date(invoice.paidDate).toLocaleDateString() : ''}` : 'Mark as paid'}
+                        />
+                        {invoice.paid && invoice.paidDate && (
+                          <div style={{ fontSize: 11, color: '#16a34a', marginTop: 2 }}>
+                            {new Date(invoice.paidDate).toLocaleDateString()}
+                          </div>
+                        )}
+                      </td>
                       <td style={{ padding: '8px', borderTop: '1px solid #e2e8f0', display: 'flex', gap: 8 }} onClick={e => e.stopPropagation()}>
                         {inlineEditIdx === idx ? (
                           <>
                             <button
                               style={{ background: '#16a34a', color: '#fff', border: 'none', borderRadius: 6, padding: '4px 12px', fontWeight: 600, fontSize: 14, cursor: 'pointer' }}
-                              onClick={e => { e.stopPropagation(); handleInlineDateSave(invoice, idx); }}
+                              onClick={() => { handleInlineDateSave(invoice, idx); }}
                             >Save</button>
                             <button
                               style={{ background: '#e2e8f0', color: '#222', border: 'none', borderRadius: 6, padding: '4px 12px', fontWeight: 600, fontSize: 14, cursor: 'pointer' }}
@@ -713,6 +540,7 @@ function InvoicesPanel() {
                           </>
                         ) : (
                           <>
+                            {/* ...existing code... */}
                             <button
                               style={{
                                 background: '#3182ce',
@@ -764,17 +592,34 @@ function InvoicesPanel() {
             <div style={{ background: '#fff', padding: 32, borderRadius: 10, minWidth: 400, boxShadow: '0 2px 16px #0003' }}>
               <h2>Edit Invoice</h2>
               <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
-                <input name="client" value={editForm.client} onChange={handleEditFormChange} placeholder="Client" style={{ padding: 8 }} />
-                <input name="phone" value={editForm.phone} onChange={handleEditFormChange} placeholder="Phone #" style={{ padding: 8 }} />
-                  <input name="email" value={editForm.email} onChange={handleEditFormChange} placeholder="Email (optional)" style={{ padding: 8 }} type="email" />
-                <input name="address" value={editForm.address} onChange={handleEditFormChange} placeholder="Address" style={{ padding: 8 }} />
-                <input name="source" value={editForm.source} onChange={handleEditFormChange} placeholder="Source" style={{ padding: 8 }} />
-                <input name="trailerNumber" value={editForm.trailerNumber} onChange={handleEditFormChange} placeholder="Trailer #" style={{ padding: 8 }} />
-                <input name="trailerSize" value={editForm.trailerSize} onChange={handleEditFormChange} placeholder="Trailer Size" style={{ padding: 8 }} />
-                <input name="reservedDate" value={editForm.reservedDate} onChange={handleEditFormChange} placeholder="Reserved Date" type="date" style={{ padding: 8 }} />
-                <input name="dateOrdered" value={editForm.dateOrdered} onChange={handleEditFormChange} placeholder="Date Ordered" type="date" style={{ padding: 8 }} />
-                <input name="paymentAmount" value={editForm.paymentAmount} onChange={handleEditFormChange} placeholder="Payment Amount" type="number" min="0" style={{ padding: 8 }} />
-                <input name="comment" value={editForm.comment} onChange={handleEditFormChange} placeholder="Comments" style={{ padding: 8 }} />
+                <input name="client" value={editForm.client} onChange={handleEditFormChange} placeholder="Client" style={{ padding: 8 }} tabIndex={1} />
+                <input name="phone" value={editForm.phone} onChange={handleEditFormChange} placeholder="Phone #" style={{ padding: 8 }} tabIndex={2} />
+                <input name="email" value={editForm.email} onChange={handleEditFormChange} placeholder="Email (optional)" style={{ padding: 8 }} type="email" tabIndex={3} />
+                <input name="address" value={editForm.address} onChange={handleEditFormChange} placeholder="Address" style={{ padding: 8 }} tabIndex={4} />
+                <input name="city" value={editForm.city} onChange={handleEditFormChange} placeholder="City" style={{ padding: 8 }} tabIndex={5} />
+                <input name="state" value={editForm.state} onChange={handleEditFormChange} placeholder="State" style={{ padding: 8 }} tabIndex={6} />
+                <input name="zip" value={editForm.zip} onChange={handleEditFormChange} placeholder="ZIP" style={{ padding: 8 }} tabIndex={7} />
+                <select
+                  name="source"
+                  value={editForm.source}
+                  onChange={handleEditFormChange}
+                  style={{ padding: 8 }}
+                  tabIndex={8}
+                >
+                  <option value="">Source</option>
+                  <option value="Phone">Phone</option>
+                  <option value="Website">Website</option>
+                  <option value="Referral">Referral</option>
+                  <option value="Repeat Customer">Repeat Customer</option>
+                  <option value="Walk-in">Walk-in</option>
+                  <option value="Other">Other</option>
+                </select>
+                <input name="trailerNumber" value={editForm.trailerNumber} onChange={handleEditFormChange} placeholder="Trailer #" style={{ padding: 8 }} tabIndex={9} />
+                <input name="trailerSize" value={editForm.trailerSize} onChange={handleEditFormChange} placeholder="Trailer Size" style={{ padding: 8 }} tabIndex={10} />
+                <input name="reservedDate" value={editForm.reservedDate} onChange={handleEditFormChange} placeholder="Reserved Date" type="date" style={{ padding: 8 }} tabIndex={11} />
+                <input name="dateOrdered" value={editForm.dateOrdered} onChange={handleEditFormChange} placeholder="Date Ordered" type="date" style={{ padding: 8 }} tabIndex={12} />
+                <input name="paymentAmount" value={editForm.paymentAmount} onChange={handleEditFormChange} placeholder="Payment Amount" type="number" min="0" style={{ padding: 8 }} tabIndex={13} />
+                <input name="comment" value={editForm.comment} onChange={handleEditFormChange} placeholder="Comments" style={{ padding: 8 }} tabIndex={14} />
               </div>
               <div style={{ display: 'flex', gap: 16, marginTop: 24, justifyContent: 'flex-end' }}>
                 <button onClick={handleEditCancel} style={{ background: '#e2e8f0', color: '#2d3748', border: 'none', borderRadius: 6, padding: '8px 20px', fontWeight: 600, fontSize: 15, cursor: 'pointer' }}>Cancel</button>
