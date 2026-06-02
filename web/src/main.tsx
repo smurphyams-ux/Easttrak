@@ -8,7 +8,6 @@ window.addEventListener('unhandledrejection', function(event) {
 import React from 'react';
 import ReactDOM from 'react-dom/client';
 import App from './App';
-import { ProfessionalCustomersProvider } from './contexts/ProfessionalCustomersContext';
 import './index.css';
 
 const root = document.getElementById('root');
@@ -20,8 +19,6 @@ if (!root) {
 
 ReactDOM.createRoot(root).render(
   <React.StrictMode>
-    <ProfessionalCustomersProvider>
-      <App />
-    </ProfessionalCustomersProvider>
+    <App />
   </React.StrictMode>
 );
