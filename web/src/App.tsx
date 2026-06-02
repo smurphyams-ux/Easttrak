@@ -1,6 +1,7 @@
 import { BrowserRouter, Navigate, Route, Routes } from 'react-router-dom';
 import DashboardScreen from './screens/DashboardScreen';
 import InvoicesPanel from './screens/InvoicesPanel';
+import TrackDeliveryPage from './pages/TrackDeliveryPage';
 
 export default function App() {
   return (
@@ -9,6 +10,7 @@ export default function App() {
         <Route path="/dashboard" element={<DashboardScreen />} />
         <Route path="/route" element={<DashboardScreen />} />
         <Route path="/invoices" element={<InvoicesPanel />} />
+        <Route path="/track/:token" element={<TrackDeliveryPage />} />
         <Route path="/" element={<Navigate to="/dashboard" replace />} />
         <Route path="*" element={<Navigate to="/dashboard" replace />} />
       </Routes>
