@@ -1,147 +1,118 @@
-                  <span className="text-white text-sm font-semibold">82% of $30K goal</span>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </section>
+import RoutesPage from './pages/RoutesPage';
+import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
+import { AuthProvider } from './contexts/AuthContext';
+import { BusinessProvider, useBusiness } from './contexts/BusinessContext';
+import { ImportInvoiceProvider } from './contexts/ImportInvoiceContext';
+import InvoicesPanel from './screens/InvoicesPanel';
 
-      {/* Container Management Section */}
-      <section className="mb-8">
-        <div className="bg-white rounded-lg shadow p-6">
-          <h2 className="text-xl font-bold text-gray-900 mb-4">Container Management</h2>
-          <p className="text-gray-600 mb-6">View and manage all your containers</p>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            <button className="bg-blue-600 text-white py-4 px-6 rounded-lg font-semibold hover:bg-blue-700 transition">
-              View All Containers
-            </button>
-            <button className="bg-green-600 text-white py-4 px-6 rounded-lg font-semibold hover:bg-green-700 transition">
-              Add New Container
-            </button>
-            <button className="bg-gray-600 text-white py-4 px-6 rounded-lg font-semibold hover:bg-gray-700 transition">
-              Container Reports
-            </button>
-          </div>
-        </div>
-      </section>
 
-      {/* Routes & Deliveries Section */}
-      <section className="mb-8">
-        <div className="bg-white rounded-lg shadow p-6">
-          <h2 className="text-xl font-bold text-gray-900 mb-4">Routes & Deliveries</h2>
-          <p className="text-gray-600 mb-6">Plan routes and schedule deliveries</p>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            <button className="bg-blue-600 text-white py-4 px-6 rounded-lg font-semibold hover:bg-blue-700 transition">
-              View All Routes
-            </button>
-            <button className="bg-green-600 text-white py-4 px-6 rounded-lg font-semibold hover:bg-green-700 transition">
-              Schedule Delivery
-            </button>
-            <button className="bg-purple-600 text-white py-4 px-6 rounded-lg font-semibold hover:bg-purple-700 transition">
-              Optimize Routes
-            </button>
-          </div>
-        </div>
-      </section>
 
-      {/* Customers & Billing Section */}
-      <section className="mb-8">
-        <div className="bg-white rounded-lg shadow p-6">
-          <h2 className="text-xl font-bold text-gray-900 mb-4">Customers & Billing</h2>
-          <p className="text-gray-600 mb-6">Manage customer accounts and invoices</p>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            <button className="bg-blue-600 text-white py-4 px-6 rounded-lg font-semibold hover:bg-blue-700 transition">
-              View Customers
-            </button>
-            <button className="bg-green-600 text-white py-4 px-6 rounded-lg font-semibold hover:bg-green-700 transition">
-              Create Invoice
-            </button>
-            <button className="bg-yellow-600 text-white py-4 px-6 rounded-lg font-semibold hover:bg-yellow-700 transition">
-              Pending Payments
-            </button>
-          </div>
-        </div>
-      </section>
+import LoginScreen from './screens/LoginScreen';
+import DashboardScreen from './screens/DashboardScreen';
+import StopDetailsScreen from './screens/StopDetailsScreen';
+import QRScanScreen from './screens/QRScanScreen';
+import ScanScreen from './screens/ScanScreen';
+import FleetPanel from './screens/FleetPanel';
+import ReportsPanel from './screens/ReportsPanel';
+import BankAccountsPanel from './screens/BankAccountsPanel';
+import DeliveriesPanel from './screens/DeliveriesPanel';
+import ProfessionalCustomersPage from './pages/ProfessionalCustomersPage';
+import DriverDashboard from './pages/DriverDashboard';
+import CreateInvoiceForm from './pages/CreateInvoiceForm';
+import TrackDeliveryPage from './pages/TrackDeliveryPage';
+import { useAuth } from './contexts/AuthContext';
 
-      {/* Reports & Analytics Section */}
-      <section>
-        <div className="bg-white rounded-lg shadow p-6">
-          <h2 className="text-xl font-bold text-gray-900 mb-4">Reports & Analytics</h2>
-          <p className="text-gray-600 mb-6">Generate reports and view analytics</p>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            <button className="bg-purple-600 text-white py-4 px-6 rounded-lg font-semibold hover:bg-purple-700 transition">
-              Financial Report
-            </button>
-            <button className="bg-blue-600 text-white py-4 px-6 rounded-lg font-semibold hover:bg-blue-700 transition">
-              Performance Metrics
-            </button>
-            <button className="bg-gray-600 text-white py-4 px-6 rounded-lg font-semibold hover:bg-gray-700 transition">
-              Export Data
-            </button>
-          </div>
-        </div>
-      </section>
+
+
+
+function BusinessSelector() {
+  const { businessId, setBusinessId, businesses } = useBusiness();
+  const isCompact = typeof window !== 'undefined' && window.innerWidth <= 768;
+  // Debug output
+  if (!businesses || businesses.length === 0) {
+    return (
+      <div style={{ padding: 8, background: '#ffeaea', borderBottom: '1px solid #eee', color: 'red' }}>
+        <strong>BusinessSelector Error:</strong> No businesses found.<br />
+        <span>businessId: {String(businessId)}</span><br />
+        <span>businesses: {JSON.stringify(businesses)}</span>
+      </div>
+    );
+  }
+  return (
+    <div style={{ padding: isCompact ? '6px 10px' : 8, background: '#f8f8f8', borderBottom: '1px solid #eee', display: 'flex', alignItems: 'center', gap: isCompact ? 6 : 8, flexWrap: 'wrap' }}>
+      <span style={{ fontWeight: 500, fontSize: isCompact ? 13 : 15 }}>Business:</span>
+      <select value={businessId} onChange={e => setBusinessId(e.target.value)} style={{ fontSize: isCompact ? 14 : 16, padding: isCompact ? '3px 6px' : 4, minHeight: isCompact ? 32 : undefined }}>
+        {businesses.map(b => (
+          <option key={b.id} value={b.id}>{b.name}</option>
+        ))}
+      </select>
     </div>
   );
 }
 
-function App() {
-  const [isAuthenticated, setIsAuthenticated] = useState(false);
-  const [currentUser, setCurrentUser] = useState<string | null>(null);
-
-  const handleLogin = (username: string, password: string) => {
-    // Simple authentication - in production, this would call an API
-    if (username && password) {
-      setIsAuthenticated(true);
-      setCurrentUser(username);
-    }
-  };
-
-  const handleLogout = () => {
-    setIsAuthenticated(false);
-    setCurrentUser(null);
-  };
-
-
-
-  import React from 'react';
-  import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
-  import { AuthProvider } from '../contexts/AuthContext';
-  import LoginScreen from './screens/LoginScreen';
-  import DashboardScreen from './screens/DashboardScreen';
-  import RouteScreen from './screens/RouteScreen';
-  import StopDetailsScreen from './screens/StopDetailsScreen';
-  import QRScanScreen from './screens/QRScanScreen';
-  import CustomerPanel from './screens/CustomerPanel';
-  import FleetPanel from './screens/FleetPanel';
-  import InvoicesPanel from './screens/InvoicesPanel';
-  import ScanScreen from './screens/ScanScreen';
-  import ReportsPanel from './screens/ReportsPanel';
-  import BankAccountsPanel from './screens/BankAccountsPanel';
-  import DeliveriesPanel from './screens/DeliveriesPanel';
-}
-  export default function App() {
-    return (
-      <AuthProvider>
-        <BrowserRouter>
+export default function App() {
+  // Use auth context to determine user role
+  function AppRoutes() {
+    const { user } = useAuth();
+      if (!user) {
+        // Not logged in: always show login screen
+        return (
           <Routes>
-            <Route path="/" element={<Navigate to="/login" replace />} />
             <Route path="/login" element={<LoginScreen />} />
-            <Route path="/dashboard" element={<DashboardScreen />} />
-            <Route path="/route" element={<RouteScreen />} />
-            <Route path="/stop-details" element={<StopDetailsScreen />} />
-            <Route path="/qr-scan" element={<QRScanScreen />} />
-            <Route path="/customers" element={<CustomerPanel />} />
-            <Route path="/fleet" element={<FleetPanel />} />
-            <Route path="/invoices" element={<InvoicesPanel />} />
-            <Route path="/scan" element={<ScanScreen />} />
-            <Route path="/reports" element={<ReportsPanel />} />
-            <Route path="/bank" element={<BankAccountsPanel />} />
-            <Route path="/deliveries" element={<DeliveriesPanel />} />
+            <Route path="/track/:token" element={<TrackDeliveryPage />} />
+            <Route path="/" element={<Navigate to="/login" replace />} />
+            <Route path="*" element={<Navigate to="/login" replace />} />
           </Routes>
-        </BrowserRouter>
-      </AuthProvider>
-    );
-  }
-
-export default App;
+        );
+      }
+      if (user.role === 'driver') {
+        return (
+          <Routes>
+            <Route path="/login" element={<LoginScreen />} />
+            <Route path="/track/:token" element={<TrackDeliveryPage />} />
+            <Route path="/driver" element={<DriverDashboard />} />
+            <Route path="/route" element={<RoutesPage />} />
+            <Route path="/scan" element={<ScanScreen />} />
+            <Route path="/" element={<Navigate to="/driver" replace />} />
+            <Route path="*" element={<Navigate to="/driver" replace />} />
+          </Routes>
+        );
+      }
+      // Manager/admin: full access
+      return (
+        <Routes>
+          <Route path="/login" element={<LoginScreen />} />
+          <Route path="/track/:token" element={<TrackDeliveryPage />} />
+          <Route path="/dashboard" element={<DashboardScreen />} />
+          <Route path="/driver" element={<DriverDashboard />} />
+          <Route path="/professional-customers" element={<ProfessionalCustomersPage />} />
+          <Route path="/invoices" element={<InvoicesPanel />} />
+          <Route path="/deliveries" element={<DeliveriesPanel />} />
+          <Route path="/pickups" element={<StopDetailsScreen />} />
+          <Route path="/route" element={<RoutesPage />} />
+          <Route path="/scan" element={<ScanScreen />} />
+          <Route path="/qr-scan" element={<QRScanScreen />} />
+          <Route path="/fleet" element={<FleetPanel />} />
+          <Route path="/reports" element={<ReportsPanel />} />
+          <Route path="/bank" element={<BankAccountsPanel />} />
+          <Route path="/create-invoice" element={<CreateInvoiceForm />} />
+          <Route path="/" element={<Navigate to="/dashboard" replace />} />
+          <Route path="*" element={<Navigate to="/dashboard" replace />} />
+        </Routes>
+      );
+    }
+  return (
+    <div>
+      <BusinessProvider>
+        <AuthProvider>
+          <ImportInvoiceProvider>
+            <BrowserRouter>
+              <BusinessSelector />
+              <AppRoutes />
+            </BrowserRouter>
+          </ImportInvoiceProvider>
+        </AuthProvider>
+      </BusinessProvider>
+    </div>
+  );
+}
