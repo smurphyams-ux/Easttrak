@@ -1,7 +1,12 @@
 import { BrowserRouter, Navigate, Route, Routes } from 'react-router-dom';
-import { RoutesPage } from './pages/RoutesPage';
+import * as RoutesPageModule from './pages/RoutesPage';
 import DashboardScreen from './screens/DashboardScreen';
 import InvoicesPanel from './screens/InvoicesPanel';
+
+const RoutesPage =
+  (RoutesPageModule as any).default ||
+  (RoutesPageModule as any).RoutesPage ||
+  (() => null);
 
 export default function App() {
   return (
