@@ -1,22 +1,39 @@
 {
   "name": "easytrak-app",
-  "version": "1.0.0",
   "type": "module",
+  "version": "1.0.0",
   "scripts": {
-    "dev": "vite --port 3000",
-    "dev2": "vite --port 8080"
+    "dev": "vite --port 3001 --host --strictPort",
+    "start": "vite preview --port 3001 --host",
+    "build": "vite build"
   },
   "dependencies": {
+    "axios": "^1.16.1",
+    "express": "^5.2.1",
+    "html5-qrcode": "^2.3.8",
+    "papaparse": "^5.5.3",
+    "qrcode": "^1.5.4",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
-    "react-router-dom": "^7.13.0"
+    "react-router-dom": "^7.15.1",
+    "socket.io-client": "^4.7.5"
   },
   "devDependencies": {
+    "@rollup/rollup-win32-x64-msvc": "^4.60.4",
+    "@tailwindcss/oxide-win32-x64-msvc": "^4.2.4",
     "@tailwindcss/postcss": "^4.1.18",
+    "@types/cors": "^2.8.19",
+    "@types/google.maps": "^3.64.1",
+    "@types/node": "^25.5.2",
+    "@types/pg": "^8.20.0",
     "@vitejs/plugin-react": "^4.2.1",
     "autoprefixer": "^10.4.23",
+    "lightningcss": "^1.32.0",
+    "lightningcss-win32-x64-msvc": "^1.32.0",
     "postcss": "^8.5.6",
     "tailwindcss": "^4.1.18",
-    "vite": "^5.0.8"
+    "ts-node": "^10.9.2",
+    "typescript": "^6.0.2",
+    "vite": "^7.0.0"
   }
 }
