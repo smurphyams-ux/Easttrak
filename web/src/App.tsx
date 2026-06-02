@@ -1,5 +1,5 @@
 import { BrowserRouter, Navigate, Route, Routes } from 'react-router-dom';
-import RoutesPage from './pages/RoutesPage';
+import { RoutesPage } from './pages/RoutesPage';
 import DashboardScreen from './screens/DashboardScreen';
 import InvoicesPanel from './screens/InvoicesPanel';
 
