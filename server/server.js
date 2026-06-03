@@ -38,6 +38,7 @@ const app = express();
 const server = http.createServer(app);
 const configuredFrontendUrl = String(process.env.FRONTEND_URL || '').trim().replace(/\/$/, '');
 const allowedOriginPatterns = [
+  /^https:\/\/[a-z0-9-]+\.onrender\.com$/i,
   /^http:\/\/localhost(?::\d+)?$/i,
   /^http:\/\/127\.0\.0\.1(?::\d+)?$/i,
   /^http:\/\/192\.168\.\d{1,3}\.\d{1,3}(?::\d+)?$/i,
