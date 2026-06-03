@@ -12,6 +12,7 @@ dotenv.config({ path: path.join(__dirname, '.env') });
 dotenv.config({ path: path.join(__dirname, '..', '.env') });
 
 const connectionString = String(process.env.DATABASE_URL || '').trim();
+const shouldUseSsl = process.env.PGSSLMODE === 'require' || /render\.com$/i.test(String(process.env.PGHOST || '').trim());
 
 const pool = connectionString
   ? new Pool({
@@ -24,6 +25,7 @@ const pool = connectionString
       database: process.env.PGDATABASE || 'easytrak',
       password: process.env.PGPASSWORD || '',
       port: Number(process.env.PGPORT || 5432),
+      ssl: shouldUseSsl ? { rejectUnauthorized: false } : false,
     });
 
 export default pool;
